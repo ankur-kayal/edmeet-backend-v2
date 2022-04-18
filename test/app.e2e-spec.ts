@@ -29,4 +29,28 @@ describe('AppController (e2e)', () => {
       .expectStatus(HttpStatus.OK)
       .expectBody('Welcome to Edmeet API!');
   });
+
+  describe('Room', () => {
+    describe('rooms resolver', () => {
+      it('should return rooms', () => {
+        return pactum
+          .spec()
+          .post('/graphql')
+          .withGraphQLQuery(
+            `query Rooms {
+              rooms {
+                code
+                createdAt
+                description
+                id
+                name
+                photo
+                updatedAt
+              }
+            }`,
+          )
+          .expectStatus(200);
+      });
+    });
+  });
 });
