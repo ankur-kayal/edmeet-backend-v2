@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  test-db:
+    image: prismagraphql/mongo-single-replica:5.0.3
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: prisma
+      MONGO_HOST: localhost
+      MONGO_PORT: 27018
+    ports:
+      - 27018:27018
