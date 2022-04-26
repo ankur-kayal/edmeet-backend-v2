@@ -1,0 +1,44 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateRoomInput {
+  code: String!
+  description: String
+  name: String!
+  photo: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createRoom(createRoomInput: CreateRoomInput!): Room!
+  removeRoom(id: String!): String!
+  updateRoom(updateRoomInput: UpdateRoomInput!): Room!
+}
+
+type Query {
+  room(id: String!): Room
+  rooms: [Room!]!
+}
+
+type Room {
+  code: String!
+  createdAt: DateTime!
+  description: String
+  id: String!
+  name: String!
+  photo: String!
+  updatedAt: DateTime!
+}
+
+input UpdateRoomInput {
+  code: String
+  description: String
+  id: String!
+  name: String
+  photo: String
+}
