@@ -16,8 +16,20 @@ model Room {
   description String?
   code        String
   photo       String   @default("default-photo.jpg")
+  feeds       Feed[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("rooms")
+}
+
+model Feed {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  text      String
+  room      Room     @relation(fields: [roomId], references: [id])
+  roomId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("feeds")
 }
