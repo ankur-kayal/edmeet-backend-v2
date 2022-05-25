@@ -7,6 +7,7 @@ import { RoomModule } from './room/room.module';
 import { join } from 'path';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import { FeedModule } from './feed/feed.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     RoomModule,
     PrismaModule,
+    FeedModule,
   ],
   controllers: [AppController],
   providers: [AppService],

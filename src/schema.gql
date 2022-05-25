@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input CreateFeedInput {
+  roomId: String!
+  text: String!
+}
+
 input CreateRoomInput {
   code: String!
   description: String
@@ -14,13 +19,26 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Feed {
+  createdAt: DateTime!
+  id: String!
+  roomId: String!
+  text: String!
+  updatedAt: DateTime!
+}
+
 type Mutation {
+  createFeed(createFeedInput: CreateFeedInput!): Feed!
   createRoom(createRoomInput: CreateRoomInput!): Room!
+  removeFeed(id: String!): String!
   removeRoom(id: String!): String!
+  updateFeed(id: String!, updateFeedInput: UpdateFeedInput!): Feed!
   updateRoom(updateRoomInput: UpdateRoomInput!): Room!
 }
 
 type Query {
+  feed(id: String!): Feed!
+  feeds: [Feed!]!
   room(id: String!): Room
   rooms: [Room!]!
 }
@@ -33,6 +51,10 @@ type Room {
   name: String!
   photo: String!
   updatedAt: DateTime!
+}
+
+input UpdateFeedInput {
+  text: String!
 }
 
 input UpdateRoomInput {
