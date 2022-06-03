@@ -24,12 +24,25 @@ model Room {
 }
 
 model Feed {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  text      String
+  room      Room      @relation(fields: [roomId], references: [id])
+  roomId    String    @db.ObjectId
+  comments  Comment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("feeds")
+}
+
+model Comment {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   text      String
-  room      Room     @relation(fields: [roomId], references: [id])
+  feed      Feed     @relation(fields: [feedId], references: [id])
+  feedId    String   @db.ObjectId
   roomId    String   @db.ObjectId
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("feeds")
+  @@map("comments")
 }

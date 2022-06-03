@@ -2,6 +2,21 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Comment {
+  createdAt: DateTime!
+  feedId: String!
+  id: String!
+  roomId: String!
+  text: String!
+  updatedAt: DateTime!
+}
+
+input CreateCommentInput {
+  feedId: String!
+  roomId: String!
+  text: String!
+}
+
 input CreateFeedInput {
   roomId: String!
   text: String!
@@ -28,15 +43,20 @@ type Feed {
 }
 
 type Mutation {
+  createComment(createCommentInput: CreateCommentInput!): Comment!
   createFeed(createFeedInput: CreateFeedInput!): Feed!
   createRoom(createRoomInput: CreateRoomInput!): Room!
+  removeComment(id: String!): Comment!
   removeFeed(id: String!): String!
   removeRoom(id: String!): String!
+  updateComment(id: String!, updateCommentInput: UpdateCommentInput!): Comment!
   updateFeed(id: String!, updateFeedInput: UpdateFeedInput!): Feed!
   updateRoom(updateRoomInput: UpdateRoomInput!): Room!
 }
 
 type Query {
+  comment(id: String!): Comment!
+  comments: [Comment!]!
   feed(id: String!): Feed!
   feeds: [Feed!]!
   room(id: String!): Room
@@ -51,6 +71,10 @@ type Room {
   name: String!
   photo: String!
   updatedAt: DateTime!
+}
+
+input UpdateCommentInput {
+  text: String!
 }
 
 input UpdateFeedInput {
