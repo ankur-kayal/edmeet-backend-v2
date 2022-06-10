@@ -25,9 +25,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --verbose --runInBand --config ./test/jest-e2e.json",
     "pretest:e2e:local": "npm run db:test:restart",
-    "test:e2e:local": "dotenv -e .env.test -- jest --watch --no-cache --config ./test/jest-e2e.json"
+    "test:e2e:local": "dotenv -e .env.test -- jest --verbose --runInBand --watchAll --no-cache --config ./test/jest-e2e.json"
   },
   "dependencies": {
     "@nestjs/apollo": "^10.0.9",
