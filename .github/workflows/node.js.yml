@@ -27,6 +27,9 @@ jobs:
     
     env:
       DATABASE_URL: mongodb://root:prisma@localhost:27017/prisma-mongo?authSource=admin&retryWrites=true&w=majority
+      JWT_EXPIRY: 1d
+      JWT_SECRET: MbQeThWmZq4t7w!z%C*F-J@NcRfUjXn2
+      NODE_ENV: development
 
     steps:
     - uses: actions/checkout@v3
