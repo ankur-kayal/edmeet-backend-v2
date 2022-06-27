@@ -42,10 +42,21 @@ type Feed {
   updatedAt: DateTime!
 }
 
+type LoginResponse {
+  access_token: String!
+  user: User!
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
 type Mutation {
   createComment(createCommentInput: CreateCommentInput!): Comment!
   createFeed(createFeedInput: CreateFeedInput!): Feed!
   createRoom(createRoomInput: CreateRoomInput!): Room!
+  registerUser(registerUserInput: RegisterUserInput!): User!
   removeComment(id: String!): Comment!
   removeFeed(id: String!): String!
   removeRoom(id: String!): String!
@@ -59,8 +70,18 @@ type Query {
   comments: [Comment!]!
   feed(id: String!): Feed!
   feeds: [Feed!]!
+  getCurrentUser: User!
+  loginUser(loginUserInput: LoginUserInput!): LoginResponse!
   room(id: String!): Room
   rooms: [Room!]!
+}
+
+input RegisterUserInput {
+  email: String!
+  id: String
+  institution: String!
+  name: String!
+  password: String!
 }
 
 type Room {
@@ -87,4 +108,13 @@ input UpdateRoomInput {
   id: String!
   name: String
   photo: String
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  id: String!
+  institution: String!
+  name: String!
+  updatedAt: DateTime!
 }

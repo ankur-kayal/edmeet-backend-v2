@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Room } from '@prisma/client';
@@ -12,8 +13,12 @@ import { isValidObjectId } from '../lib';
 
 @Injectable()
 export class RoomService {
-  constructor(private readonly prisma: PrismaService) {}
+  logger: Logger;
+  constructor(private readonly prisma: PrismaService) {
+    this.logger = new Logger(RoomService.name);
+  }
   async create(createRoomInput: CreateRoomInput) {
+    this.logger.debug('Creating room with input: ', createRoomInput);
     return await this.prisma.room.create({
       data: createRoomInput,
     });
