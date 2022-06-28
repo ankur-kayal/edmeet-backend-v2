@@ -1,6 +1,5 @@
 import { Resolver, Mutation, Args, Context, Query } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import { Auth } from './entities/auth.entity';
 import { Logger, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from './guards/gql-auth.guard';
 import { LoginResponse } from './dto/login-response';
@@ -10,7 +9,7 @@ import { UserService } from '../user/user.service';
 import { RegisterUserInput } from './dto/register-user.input';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
-@Resolver(() => Auth)
+@Resolver()
 export class AuthResolver {
   logger: Logger;
   constructor(
