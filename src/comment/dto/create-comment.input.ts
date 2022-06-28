@@ -1,11 +1,12 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { Transform, TransformFnParams } from 'class-transformer';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 import { IsMongoDBId } from '../../lib/mongodb.validator';
 
 @InputType()
 export class CreateCommentInput {
   @Field({ nullable: true })
+  @IsOptional()
   @Transform(({ value }: TransformFnParams) => value?.trim())
   @IsMongoDBId({ message: '$property should be a valid MongoDB id.' })
   id?: string;
