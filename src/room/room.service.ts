@@ -31,7 +31,7 @@ export class RoomService {
   async findOne(id: string): Promise<Room> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
-      throw new BadRequestException('id should be a valid MongoDB ObjectId');
+      throw new BadRequestException('id should be a valid MongoDB id.');
     }
     let room = null;
     room = await this.prisma.room.findUnique({
@@ -50,7 +50,7 @@ export class RoomService {
   async update(id: string, updateRoomInput: UpdateRoomInput): Promise<Room> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
-      throw new BadRequestException('id should be a valid MongoDB ObjectId');
+      throw new BadRequestException('id should be a valid MongoDB id.');
     }
 
     // check if room exists or not
@@ -80,7 +80,7 @@ export class RoomService {
   async remove(id: string): Promise<string> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
-      throw new BadRequestException('id should be a valid MongoDB ObjectId');
+      throw new BadRequestException('id should be a valid MongoDB id.');
     }
     // check if room exists or not
 
