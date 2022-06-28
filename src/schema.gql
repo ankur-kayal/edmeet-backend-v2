@@ -63,9 +63,11 @@ type Mutation {
   removeComment(id: String!): Comment!
   removeFeed(id: String!): String!
   removeRoom(id: String!): String!
+  removeUser: String!
   updateComment(id: String!, updateCommentInput: UpdateCommentInput!): Comment!
   updateFeed(id: String!, updateFeedInput: UpdateFeedInput!): Feed!
   updateRoom(updateRoomInput: UpdateRoomInput!): Room!
+  updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
 type Query {
@@ -111,6 +113,10 @@ input UpdateRoomInput {
   id: String!
   name: String
   photo: String
+}
+
+input UpdateUserInput {
+  name: String!
 }
 
 type User {

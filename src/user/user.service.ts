@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { User } from './entities/user.entity';
 import { RegisterUserInput } from '../auth/dto/register-user.input';
 import * as argon from 'argon2';
+import { UpdateUserInput } from './dto/update-user.input';
 
 @Injectable()
 export class UserService {
@@ -26,5 +27,24 @@ export class UserService {
         email,
       },
     });
+  }
+
+  async update(id: string, updateUserInput: UpdateUserInput) {
+    return await this.prismaService.user.update({
+      where: {
+        id,
+      },
+      data: updateUserInput,
+    });
+  }
+
+  async remove(id: string) {
+    await this.prismaService.user.delete({
+      where: {
+        id,
+      },
+    });
+
+    return `User with id: ${id} removed successfully!`;
   }
 }

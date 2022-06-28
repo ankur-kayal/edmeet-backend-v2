@@ -1,7 +1,11 @@
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
+import { Transform, TransformFnParams } from 'class-transformer';
+import { IsNotEmpty } from 'class-validator';
 
 @InputType()
 export class UpdateUserInput {
-  @Field(() => Int)
-  id: number;
+  @Field()
+  @Transform(({ value }: TransformFnParams) => value?.trim())
+  @IsNotEmpty({ message: '$property cannot be empty.' })
+  name: string;
 }
