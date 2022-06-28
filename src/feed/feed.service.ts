@@ -14,13 +14,6 @@ import { Feed } from './entities/feed.entity';
 export class FeedService {
   constructor(private readonly prisma: PrismaService) {}
   async create(createFeedInput: CreateFeedInput): Promise<Feed> {
-    // validate roomId
-    if (!isValidObjectId(createFeedInput.roomId)) {
-      throw new BadRequestException(
-        'roomId should be a valid MongoDB ObjectId',
-      );
-    }
-
     // validate if room with roomId exists in the database
     if (
       !(await this.prisma.room.count({
@@ -50,9 +43,7 @@ export class FeedService {
   async findOne(id: string): Promise<Feed> {
     // validate feedId
     if (!isValidObjectId(id)) {
-      throw new BadRequestException(
-        'roomId should be a valid MongoDB ObjectId',
-      );
+      throw new BadRequestException('roomId should be a valid MongoDB id.');
     }
 
     const feed = await this.prisma.feed.findUnique({
@@ -70,7 +61,7 @@ export class FeedService {
   async update(id: string, updateFeedInput: UpdateFeedInput): Promise<Feed> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
-      throw new BadRequestException('id should be a valid MongoDB ObjectId');
+      throw new BadRequestException('id should be a valid MongoDB id.');
     }
 
     // check if feed exists or not
@@ -98,7 +89,7 @@ export class FeedService {
   async remove(id: string): Promise<string> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
-      throw new BadRequestException('id should be a valid MongoDB ObjectId');
+      throw new BadRequestException('id should be a valid MongoDB id.');
     }
 
     // check if the feed exists or not

@@ -4,7 +4,7 @@ import * as pactum from 'pactum';
 import { AppModule } from './../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 
-describe('Comments (e2e)', () => {
+describe.skip('Comments (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
 

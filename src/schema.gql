@@ -13,11 +13,13 @@ type Comment {
 
 input CreateCommentInput {
   feedId: String!
+  id: String
   roomId: String!
   text: String!
 }
 
 input CreateFeedInput {
+  id: String
   roomId: String!
   text: String!
 }
@@ -25,6 +27,7 @@ input CreateFeedInput {
 input CreateRoomInput {
   code: String!
   description: String
+  id: String
   name: String!
   photo: String
 }

@@ -15,20 +15,6 @@ export class CommentService {
   async create(createCommentInput: CreateCommentInput): Promise<Comment> {
     const { roomId, feedId } = createCommentInput;
 
-    // validate roomId
-    if (!isValidObjectId(roomId)) {
-      throw new BadRequestException(
-        'roomId should be a valid MongoDB ObjectId',
-      );
-    }
-
-    // validate feedId
-    if (!isValidObjectId(feedId)) {
-      throw new BadRequestException(
-        'feedId should be a valid MongoDB ObjectId',
-      );
-    }
-
     // validate if room with roomId exists in the database
     const room = await this.prisma.room.findUnique({
       where: {
@@ -66,9 +52,7 @@ export class CommentService {
   async findOne(id: string): Promise<Comment> {
     // validate feedId
     if (!isValidObjectId(id)) {
-      throw new BadRequestException(
-        'commentId should be a valid MongoDB ObjectId',
-      );
+      throw new BadRequestException('commentId should be a valid MongoDB id.');
     }
 
     // check if comment exists in the database
@@ -89,7 +73,7 @@ export class CommentService {
   ): Promise<Comment> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
-      throw new BadRequestException('id should be a valid MongoDB ObjectId');
+      throw new BadRequestException('id should be a valid MongoDB id.');
     }
 
     // validate if comment with id exists
@@ -115,7 +99,7 @@ export class CommentService {
   async remove(id: string): Promise<string> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
-      throw new BadRequestException('id should be a valid MongoDB ObjectId');
+      throw new BadRequestException('id should be a valid MongoDB id.');
     }
 
     const comment = await this.prisma.comment.findUnique({
