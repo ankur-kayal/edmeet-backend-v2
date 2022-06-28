@@ -93,10 +93,15 @@ type Room {
   code: String!
   createdAt: DateTime!
   description: String
+  editorIds: [String!]!
+  editors: [User!]
+  feeds: [Feed!]
   id: String!
   name: String!
   photo: String!
   updatedAt: DateTime!
+  viewerIds: [String!]!
+  viewers: [User!]
 }
 
 input UpdateCommentInput {
@@ -121,9 +126,13 @@ input UpdateUserInput {
 
 type User {
   createdAt: DateTime!
+  editRoomIds: [String!]!
+  editRooms: [Room!]
   email: String!
   id: String!
   institution: String!
   name: String!
   updatedAt: DateTime!
+  viewRoomIds: [String!]!
+  viewRooms: [Room!]
 }

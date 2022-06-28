@@ -17,6 +17,10 @@ model Room {
   code        String
   photo       String   @default("default-photo.jpg")
   feeds       Feed[]
+  editors     User[]   @relation(name: "editor room relation", fields: [editorIds], references: [id])
+  editorIds   String[] @db.ObjectId
+  viewers     User[]   @relation(name: "viewer room relation", fields: [viewerIds], references: [id])
+  viewerIds   String[] @db.ObjectId
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -51,8 +55,12 @@ model User {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   institution String
-  email       String @unique
+  email       String   @unique
   password    String
+  editRoomIds String[] @db.ObjectId
+  editRooms   Room[]   @relation(name: "editor room relation", fields: [editRoomIds], references: [id])
+  viewRoomIds String[] @db.ObjectId
+  viewRooms   Room[]   @relation(name: "viewer room relation", fields: [viewRoomIds], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
