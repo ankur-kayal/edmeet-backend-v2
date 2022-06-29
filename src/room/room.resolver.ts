@@ -53,4 +53,16 @@ export class RoomResolver {
     const userId = context.req.user.userId;
     return await this.roomService.remove(userId, id);
   }
+
+  @Mutation(() => String)
+  async joinRoom(@Args('id') id: string, @Context() context) {
+    const userId = context.req.user.userId;
+    return await this.roomService.joinRoom(userId, id);
+  }
+
+  @Mutation(() => String)
+  async leaveRoom(@Args('id') id: string, @Context() context) {
+    const userId = context.req.user.userId;
+    return await this.roomService.leaveRoom(userId, id);
+  }
 }
