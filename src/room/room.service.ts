@@ -238,4 +238,129 @@ export class RoomService {
 
     return `Room with roomId: ${id} deleted successfully`;
   }
+
+  async joinRoom(userId: string, id: string) {
+    // validate if id is valid objectId
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('id should be a valid MongoDB id.');
+    }
+
+    // check if room exists or not
+    const room = await this.prisma.room.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!room) {
+      throw new NotFoundException(`Room with id: ${id} not found`);
+    }
+
+    // by default you can join room as a viewer
+    await this.prisma.$transaction([
+      this.prisma.room.update({
+        where: {
+          id,
+        },
+        data: {
+          viewerIds: {
+            push: userId,
+          },
+        },
+      }),
+      this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          viewRoomIds: {
+            push: id,
+          },
+        },
+      }),
+    ]);
+
+    return `Room with id: ${id} joined successfully.`;
+  }
+
+  async leaveRoom(userId: string, id: string) {
+    // validate if id is valid objectId
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('id should be a valid MongoDB id.');
+    }
+
+    // check if room exists or not
+    const room = await this.prisma.room.findFirst({
+      where: {
+        id,
+        OR: [
+          {
+            viewerIds: {
+              has: userId,
+            },
+          },
+          {
+            editorIds: {
+              has: userId,
+            },
+          },
+        ],
+      },
+    });
+
+    if (!room) {
+      throw new NotFoundException(`Room with id: ${id} not found`);
+    }
+
+    const { editRoomIds, viewRoomIds } = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    const { editorIds, viewerIds } = room;
+
+    let userUpdateData = {};
+    if (editRoomIds.indexOf(id) !== -1) {
+      userUpdateData = {
+        editRoomIds: editRoomIds.filter((roomId) => roomId !== id),
+      };
+    } else {
+      userUpdateData = {
+        viewRoomIds: viewRoomIds.filter((roomId) => roomId !== id),
+      };
+    }
+
+    let roomUpdateData = {};
+    if (editorIds.indexOf(userId) !== -1) {
+      if (editRoomIds.length === 1) {
+        throw new BadRequestException(
+          `User is the only editor in room: ${id}. Leave room unsuccessful.`,
+        );
+      }
+      roomUpdateData = {
+        editorIds: editorIds.filter((editorId) => editorId !== userId),
+      };
+    } else {
+      roomUpdateData = {
+        viewerIds: viewerIds.filter((viewerId) => viewerId !== userId),
+      };
+    }
+
+    // update the room and user objects
+    await this.prisma.$transaction([
+      this.prisma.room.update({
+        where: {
+          id,
+        },
+        data: roomUpdateData,
+      }),
+      this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: userUpdateData,
+      }),
+    ]);
+
+    return `Room with id: ${id} left successfully.`;
+  }
 }

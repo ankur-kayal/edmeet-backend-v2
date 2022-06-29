@@ -42,6 +42,7 @@ export class AuthService {
       throw new BadRequestException({
         field: 'email',
         error: `User with email: ${registerUserInput.email} already exists.`,
+        statusCode: 400,
       });
     }
 

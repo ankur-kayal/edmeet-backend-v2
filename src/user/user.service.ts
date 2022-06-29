@@ -60,6 +60,10 @@ export class UserService {
       },
     });
 
+    if (!user) {
+      throw new BadRequestException(`User with id: ${id} not found.`);
+    }
+
     // validate if any one of the rooms with edit access has more than 2 editors
 
     const rooms = await this.prisma.room.findMany({

@@ -59,6 +59,8 @@ type Mutation {
   createComment(createCommentInput: CreateCommentInput!): Comment!
   createFeed(createFeedInput: CreateFeedInput!): Feed!
   createRoom(createRoomInput: CreateRoomInput!): Room!
+  joinRoom(id: String!): String!
+  leaveRoom(id: String!): String!
   registerUser(registerUserInput: RegisterUserInput!): User!
   removeComment(id: String!): Comment!
   removeFeed(id: String!): String!
