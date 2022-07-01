@@ -38,11 +38,13 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Feed {
+  commentCount: Int!
   createdAt: DateTime!
   id: String!
   roomId: String!
   text: String!
   updatedAt: DateTime!
+  userId: String!
 }
 
 type LoginResponse {
@@ -76,7 +78,7 @@ type Query {
   comment(id: String!): Comment!
   comments: [Comment!]!
   feed(id: String!): Feed!
-  feeds: [Feed!]!
+  feeds(roomId: String!): [Feed!]!
   getCurrentUser: User!
   loginUser(loginUserInput: LoginUserInput!): LoginResponse!
   room(id: String!): Room

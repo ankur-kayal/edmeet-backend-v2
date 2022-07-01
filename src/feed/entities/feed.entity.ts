@@ -1,4 +1,4 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 
 @ObjectType()
 export class Feed {
@@ -10,6 +10,12 @@ export class Feed {
 
   @Field()
   roomId: string;
+
+  @Field(() => Int)
+  commentCount: number;
+
+  @Field()
+  userId: string;
 
   @Field()
   createdAt: Date;
