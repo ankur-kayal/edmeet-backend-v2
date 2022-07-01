@@ -13,14 +13,13 @@ import { Feed } from './entities/feed.entity';
 @Injectable()
 export class FeedService {
   constructor(private readonly prisma: PrismaService) {}
-  async create(createFeedInput: CreateFeedInput): Promise<Feed> {
+  async create(
+    userId: string,
+    createFeedInput: CreateFeedInput,
+  ): Promise<Feed> {
     // validate if room with roomId exists in the database
     if (
-      !(await this.prisma.room.count({
-        where: {
-          id: createFeedInput.roomId,
-        },
-      }))
+      !(await this.validateUserBelongsToRoom(userId, createFeedInput.roomId))
     ) {
       throw new BadRequestException(
         `room with roomId ${createFeedInput.roomId} does not exist!`,
@@ -30,23 +29,37 @@ export class FeedService {
     const feed = await this.prisma.feed.create({
       data: {
         ...createFeedInput,
+        userId,
       },
     });
 
     return feed;
   }
 
-  async findAll(): Promise<Feed[]> {
-    return await this.prisma.feed.findMany();
+  async findAll(roomId: string, userId: string): Promise<Feed[]> {
+    // validate roomId
+    if (!isValidObjectId(roomId)) {
+      throw new BadRequestException('roomId should be a valid MongoDB id.');
+    }
+
+    // only need to validate if the user belongs to this room or not
+    if (!(await this.validateUserBelongsToRoom(userId, roomId))) {
+      return [];
+    }
+    return await this.prisma.feed.findMany({
+      where: {
+        roomId,
+      },
+    });
   }
 
-  async findOne(id: string): Promise<Feed> {
+  async findOne(id: string, userId: string): Promise<Feed> {
     // validate feedId
     if (!isValidObjectId(id)) {
       throw new BadRequestException('roomId should be a valid MongoDB id.');
     }
 
-    const feed = await this.prisma.feed.findUnique({
+    const feed = await this.prisma.feed.findFirst({
       where: {
         id,
       },
@@ -55,19 +68,28 @@ export class FeedService {
     if (!feed) {
       throw new NotFoundException(`Feed with id: ${id} not found`);
     }
+
+    if (!(await this.validateUserBelongsToRoom(userId, feed.roomId))) {
+      throw new NotFoundException(`Feed with id: ${id} not found`);
+    }
     return feed;
   }
 
-  async update(id: string, updateFeedInput: UpdateFeedInput): Promise<Feed> {
+  async update(
+    id: string,
+    updateFeedInput: UpdateFeedInput,
+    userId: string,
+  ): Promise<Feed> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
       throw new BadRequestException('id should be a valid MongoDB id.');
     }
 
     // check if feed exists or not
-    let feed = await this.prisma.feed.findUnique({
+    let feed = await this.prisma.feed.findFirst({
       where: {
         id,
+        userId,
       },
     });
 
@@ -86,28 +108,60 @@ export class FeedService {
     return feed;
   }
 
-  async remove(id: string): Promise<string> {
+  async remove(id: string, userId: string): Promise<string> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
       throw new BadRequestException('id should be a valid MongoDB id.');
     }
 
     // check if the feed exists or not
-    const feed = await this.prisma.feed.findUnique({
+    const feed = await this.prisma.feed.findFirst({
       where: {
         id,
+        userId,
       },
     });
 
     if (!feed) {
       throw new NotFoundException(`Feed with id: ${id} not found`);
     }
-
-    await this.prisma.feed.delete({
-      where: {
-        id,
-      },
-    });
+    await this.prisma.$transaction([
+      this.prisma.comment.deleteMany({
+        where: {
+          feedId: id,
+        },
+      }),
+      this.prisma.feed.delete({
+        where: {
+          id,
+        },
+      }),
+    ]);
     return `Feed with id: ${id} deleted successfully`;
+  }
+
+  async validateUserBelongsToRoom(
+    userId: string,
+    roomId: string,
+  ): Promise<boolean> {
+    return (
+      (await this.prisma.room.count({
+        where: {
+          id: roomId,
+          OR: [
+            {
+              editorIds: {
+                has: userId,
+              },
+            },
+            {
+              viewerIds: {
+                has: userId,
+              },
+            },
+          ],
+        },
+      })) !== 0
+    );
   }
 }
