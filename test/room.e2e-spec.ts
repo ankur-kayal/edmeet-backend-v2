@@ -6,7 +6,7 @@ import { CreateRoomInput } from '../src/room/dto/create-room.input';
 import { UpdateRoomInput } from '../src/room/dto/update-room.input';
 import { PrismaService } from '../src/prisma/prisma.service';
 
-describe('Rooms (e2e)', () => {
+describe.skip('Rooms (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
 

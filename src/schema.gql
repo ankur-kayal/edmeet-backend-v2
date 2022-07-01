@@ -13,11 +13,13 @@ type Comment {
 
 input CreateCommentInput {
   feedId: String!
+  id: String
   roomId: String!
   text: String!
 }
 
 input CreateFeedInput {
+  id: String
   roomId: String!
   text: String!
 }
@@ -25,6 +27,7 @@ input CreateFeedInput {
 input CreateRoomInput {
   code: String!
   description: String
+  id: String
   name: String!
   photo: String
 }
@@ -35,11 +38,13 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Feed {
+  commentCount: Int!
   createdAt: DateTime!
   id: String!
   roomId: String!
   text: String!
   updatedAt: DateTime!
+  userId: String!
 }
 
 type LoginResponse {
@@ -56,20 +61,24 @@ type Mutation {
   createComment(createCommentInput: CreateCommentInput!): Comment!
   createFeed(createFeedInput: CreateFeedInput!): Feed!
   createRoom(createRoomInput: CreateRoomInput!): Room!
+  joinRoom(id: String!): String!
+  leaveRoom(id: String!): String!
   registerUser(registerUserInput: RegisterUserInput!): User!
   removeComment(id: String!): Comment!
   removeFeed(id: String!): String!
   removeRoom(id: String!): String!
+  removeUser: String!
   updateComment(id: String!, updateCommentInput: UpdateCommentInput!): Comment!
   updateFeed(id: String!, updateFeedInput: UpdateFeedInput!): Feed!
   updateRoom(updateRoomInput: UpdateRoomInput!): Room!
+  updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
 type Query {
   comment(id: String!): Comment!
   comments: [Comment!]!
   feed(id: String!): Feed!
-  feeds: [Feed!]!
+  feeds(roomId: String!): [Feed!]!
   getCurrentUser: User!
   loginUser(loginUserInput: LoginUserInput!): LoginResponse!
   room(id: String!): Room
@@ -88,10 +97,15 @@ type Room {
   code: String!
   createdAt: DateTime!
   description: String
+  editorIds: [String!]!
+  editors: [User!]
+  feeds: [Feed!]
   id: String!
   name: String!
   photo: String!
   updatedAt: DateTime!
+  viewerIds: [String!]!
+  viewers: [User!]
 }
 
 input UpdateCommentInput {
@@ -110,11 +124,19 @@ input UpdateRoomInput {
   photo: String
 }
 
+input UpdateUserInput {
+  name: String!
+}
+
 type User {
   createdAt: DateTime!
+  editRoomIds: [String!]!
+  editRooms: [Room!]
   email: String!
   id: String!
   institution: String!
   name: String!
   updatedAt: DateTime!
+  viewRoomIds: [String!]!
+  viewRooms: [Room!]
 }
