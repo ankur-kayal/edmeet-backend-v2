@@ -12,16 +12,15 @@ import { isValidObjectId } from './../lib/validate-objectId';
 @Injectable()
 export class CommentService {
   constructor(private readonly prisma: PrismaService) {}
-  async create(createCommentInput: CreateCommentInput): Promise<Comment> {
+  async create(
+    createCommentInput: CreateCommentInput,
+    userId: string,
+  ): Promise<Comment> {
     const { roomId, feedId } = createCommentInput;
 
     // validate if room with roomId exists in the database
-    const room = await this.prisma.room.findUnique({
-      where: {
-        id: roomId,
-      },
-    });
-    if (!room) {
+
+    if (!(await this.checkUserExistsInRoom(roomId, userId))) {
       throw new BadRequestException(
         `room with roomId ${roomId} does not exist!`,
       );
@@ -33,7 +32,11 @@ export class CommentService {
         id: feedId,
         roomId: roomId,
       },
+      select: {
+        id: true,
+      },
     });
+
     if (!feed) {
       throw new BadRequestException(
         `feed with feedId ${feedId} belonging to room with roomId ${roomId} does not exist!`,
@@ -41,15 +44,31 @@ export class CommentService {
     }
 
     return await this.prisma.comment.create({
-      data: createCommentInput,
+      data: {
+        ...createCommentInput,
+        userId,
+      },
     });
   }
 
-  async findAll(): Promise<Comment[]> {
-    return await this.prisma.comment.findMany();
+  async findAll(
+    roomId: string,
+    feedId: string,
+    userId: string,
+  ): Promise<Comment[]> {
+    // validate if the user is a member of the room
+    if (!(await this.checkUserExistsInRoom(roomId, userId))) {
+      throw new BadRequestException(`User does not belong to room: ${roomId}`);
+    }
+    return await this.prisma.comment.findMany({
+      where: {
+        roomId,
+        feedId,
+      },
+    });
   }
 
-  async findOne(id: string): Promise<Comment> {
+  async findOne(id: string, userId: string): Promise<Comment> {
     // validate feedId
     if (!isValidObjectId(id)) {
       throw new BadRequestException('commentId should be a valid MongoDB id.');
@@ -61,15 +80,22 @@ export class CommentService {
         id,
       },
     });
-    if (!comment) {
+
+    // check if the user is a member of the room where the comment is associated
+    if (
+      !comment ||
+      !(await this.checkUserExistsInRoom(comment.roomId, userId))
+    ) {
       throw new NotFoundException(`Comment with id: ${id} not found`);
     }
+
     return comment;
   }
 
   async update(
     id: string,
     updateCommentInput: UpdateCommentInput,
+    userId: string,
   ): Promise<Comment> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
@@ -82,7 +108,9 @@ export class CommentService {
         id,
       },
     });
-    if (!comment) {
+
+    // validate if the user is the creator of the comment
+    if (!comment || comment.userId !== userId) {
       throw new NotFoundException(`Comment with id: ${id} not found`);
     }
 
@@ -96,19 +124,19 @@ export class CommentService {
     return comment;
   }
 
-  async remove(id: string): Promise<string> {
+  async remove(id: string, userId: string): Promise<string> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
       throw new BadRequestException('id should be a valid MongoDB id.');
     }
-
     const comment = await this.prisma.comment.findUnique({
       where: {
         id,
       },
     });
 
-    if (!comment) {
+    // validate if the user is the creator of the comment
+    if (!comment || comment.userId !== userId) {
       throw new NotFoundException(`Comment with id: ${id} not found`);
     }
     await this.prisma.comment.delete({
@@ -118,5 +146,30 @@ export class CommentService {
     });
 
     return `Comment with id: ${id} deleted successfully`;
+  }
+
+  async checkUserExistsInRoom(
+    roomId: string,
+    userId: string,
+  ): Promise<boolean> {
+    return (
+      (await this.prisma.room.count({
+        where: {
+          id: roomId,
+          OR: [
+            {
+              editorIds: {
+                has: userId,
+              },
+            },
+            {
+              viewerIds: {
+                has: userId,
+              },
+            },
+          ],
+        },
+      })) === 1
+    );
   }
 }
