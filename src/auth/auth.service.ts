@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/entities/user.entity';
-import { UserService } from '../user/user.service';
+import { IUserInclude, UserService } from '../user/user.service';
 import { RegisterUserInput } from './dto/register-user.input';
 import * as argon from 'argon2';
 
@@ -15,8 +15,12 @@ export class AuthService {
     this.logger = new Logger(AuthService.name);
   }
 
-  async validateUser(email: string, password: string): Promise<any> {
-    const user: User = await this.userService.findOne(email);
+  async validateUser(
+    email: string,
+    password: string,
+    include: IUserInclude,
+  ): Promise<any> {
+    const user: User = await this.userService.findOne(email, include);
 
     if (user && (await argon.verify(user.password, password))) {
       return user;
@@ -35,8 +39,11 @@ export class AuthService {
     };
   }
 
-  async register(registerUserInput: RegisterUserInput) {
-    const user = await this.userService.findOne(registerUserInput.email);
+  async register(registerUserInput: RegisterUserInput, include: IUserInclude) {
+    const user = await this.userService.findOne(
+      registerUserInput.email,
+      include,
+    );
 
     if (user) {
       throw new BadRequestException({
@@ -46,6 +53,6 @@ export class AuthService {
       });
     }
 
-    return await this.userService.create(registerUserInput);
+    return await this.userService.create(registerUserInput, include);
   }
 }

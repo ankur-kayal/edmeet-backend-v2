@@ -11,13 +11,23 @@ import { UpdateRoomInput } from './dto/update-room.input';
 
 import { isValidObjectId } from '../lib';
 
+interface IRoomInclude {
+  feeds: boolean;
+  viewers: boolean;
+  editors: boolean;
+}
+
 @Injectable()
 export class RoomService {
   logger: Logger;
   constructor(private readonly prisma: PrismaService) {
     this.logger = new Logger(RoomService.name);
   }
-  async create(userId: string, createRoomInput: CreateRoomInput) {
+  async create(
+    userId: string,
+    createRoomInput: CreateRoomInput,
+    include: IRoomInclude,
+  ) {
     this.logger.debug('Creating room with input: ', createRoomInput);
 
     // create the room
@@ -28,11 +38,7 @@ export class RoomService {
           set: [userId],
         },
       },
-      include: {
-        editors: true,
-        viewers: true,
-        feeds: true,
-      },
+      include,
     });
 
     // update the user
@@ -50,7 +56,7 @@ export class RoomService {
     return room;
   }
 
-  async findAll(userId: string) {
+  async findAll(userId: string, include: IRoomInclude) {
     this.logger.debug(userId);
     return await this.prisma.room.findMany({
       where: {
@@ -67,15 +73,15 @@ export class RoomService {
           },
         ],
       },
-      include: {
-        editors: true,
-        viewers: true,
-        feeds: true,
-      },
+      include,
     });
   }
 
-  async findOne(userId: string, id: string): Promise<Room> {
+  async findOne(
+    userId: string,
+    id: string,
+    include: IRoomInclude,
+  ): Promise<Room> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
       throw new BadRequestException('id should be a valid MongoDB id.');
@@ -97,11 +103,7 @@ export class RoomService {
           },
         ],
       },
-      include: {
-        editors: true,
-        viewers: true,
-        feeds: true,
-      },
+      include,
     });
 
     if (room == null) {
@@ -115,6 +117,7 @@ export class RoomService {
     userId: string,
     id: string,
     updateRoomInput: UpdateRoomInput,
+    include: IRoomInclude,
   ): Promise<Room> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
@@ -143,11 +146,7 @@ export class RoomService {
         id,
       },
       data: updateRoomInput,
-      include: {
-        editors: true,
-        viewers: true,
-        feeds: true,
-      },
+      include,
     });
 
     return room;
@@ -256,6 +255,14 @@ export class RoomService {
       throw new NotFoundException(`Room with id: ${id} not found`);
     }
 
+    // check if the user is already a part of the room or not
+    if (
+      room.editorIds.indexOf(userId) !== -1 ||
+      room.viewerIds.indexOf(userId) !== -1
+    ) {
+      throw new BadRequestException(`User is already a part of this room.`);
+    }
+
     // by default you can join room as a viewer
     await this.prisma.$transaction([
       this.prisma.room.update({
@@ -331,9 +338,9 @@ export class RoomService {
 
     let roomUpdateData = {};
     if (editorIds.indexOf(userId) !== -1) {
-      if (editRoomIds.length === 1) {
+      if (editorIds.length === 1) {
         throw new BadRequestException(
-          `User is the only editor in room: ${id}. Leave room unsuccessful.`,
+          `User is the only editor in this room. Leave room unsuccessful.`,
         );
       }
       roomUpdateData = {
