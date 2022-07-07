@@ -9,6 +9,8 @@ type Comment {
   roomId: String!
   text: String!
   updatedAt: DateTime!
+  user: User
+  userId: String!
 }
 
 input CreateCommentInput {
@@ -64,7 +66,7 @@ type Mutation {
   joinRoom(id: String!): String!
   leaveRoom(id: String!): String!
   registerUser(registerUserInput: RegisterUserInput!): User!
-  removeComment(id: String!): Comment!
+  removeComment(id: String!): String!
   removeFeed(id: String!): String!
   removeRoom(id: String!): String!
   removeUser: String!
@@ -76,7 +78,7 @@ type Mutation {
 
 type Query {
   comment(id: String!): Comment!
-  comments: [Comment!]!
+  comments(feedId: String!, roomId: String!): [Comment!]!
   feed(id: String!): Feed!
   feeds(roomId: String!): [Feed!]!
   getCurrentUser: User!
