@@ -5,6 +5,11 @@ import { RegisterUserInput } from '../auth/dto/register-user.input';
 import * as argon from 'argon2';
 import { UpdateUserInput } from './dto/update-user.input';
 
+export interface IUserInclude {
+  viewRooms: boolean;
+  editRooms: boolean;
+}
+
 @Injectable()
 export class UserService {
   logger: Logger;
@@ -13,43 +18,36 @@ export class UserService {
     this.logger = new Logger(UserService.name);
   }
 
-  async create(createUserInput: RegisterUserInput) {
+  async create(createUserInput: RegisterUserInput, include: IUserInclude) {
     this.logger.debug('Creating user with input: ', createUserInput);
     createUserInput.password = await argon.hash(createUserInput.password);
     return await this.prisma.user.create({
       data: createUserInput,
-      include: {
-        editRooms: true,
-        viewRooms: true,
-      },
+      include,
     });
   }
 
-  async findOne(email: string): Promise<User> {
+  async findOne(email: string, include: IUserInclude): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where: {
         email,
       },
-      include: {
-        editRooms: true,
-        viewRooms: true,
-      },
+      include,
     });
-
-    this.logger.debug(user);
     return user;
   }
 
-  async update(id: string, updateUserInput: UpdateUserInput) {
+  async update(
+    id: string,
+    updateUserInput: UpdateUserInput,
+    include: IUserInclude,
+  ) {
     return await this.prisma.user.update({
       where: {
         id,
       },
       data: updateUserInput,
-      include: {
-        editRooms: true,
-        viewRooms: true,
-      },
+      include,
     });
   }
 
