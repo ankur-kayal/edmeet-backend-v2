@@ -9,12 +9,18 @@ import { UpdateCommentInput } from './dto/update-comment.input';
 import { Comment } from './entities/comment.entity';
 import { isValidObjectId } from './../lib/validate-objectId';
 
+interface ICommentInclude {
+  feed: boolean;
+  user: boolean;
+}
+
 @Injectable()
 export class CommentService {
   constructor(private readonly prisma: PrismaService) {}
   async create(
     createCommentInput: CreateCommentInput,
     userId: string,
+    include: ICommentInclude,
   ): Promise<Comment> {
     const { roomId, feedId } = createCommentInput;
 
@@ -34,6 +40,7 @@ export class CommentService {
       },
       select: {
         id: true,
+        commentCount: true,
       },
     });
 
@@ -43,18 +50,32 @@ export class CommentService {
       );
     }
 
-    return await this.prisma.comment.create({
-      data: {
-        ...createCommentInput,
-        userId,
-      },
-    });
+    const [comment] = await this.prisma.$transaction([
+      this.prisma.comment.create({
+        data: {
+          ...createCommentInput,
+          userId,
+        },
+        include,
+      }),
+      this.prisma.feed.update({
+        where: {
+          id: feed.id,
+        },
+        data: {
+          commentCount: feed.commentCount + 1,
+        },
+      }),
+    ]);
+
+    return comment;
   }
 
   async findAll(
     roomId: string,
     feedId: string,
     userId: string,
+    include: ICommentInclude,
   ): Promise<Comment[]> {
     // validate if the user is a member of the room
     if (!(await this.checkUserExistsInRoom(roomId, userId))) {
@@ -65,10 +86,15 @@ export class CommentService {
         roomId,
         feedId,
       },
+      include,
     });
   }
 
-  async findOne(id: string, userId: string): Promise<Comment> {
+  async findOne(
+    id: string,
+    userId: string,
+    include: ICommentInclude,
+  ): Promise<Comment> {
     // validate feedId
     if (!isValidObjectId(id)) {
       throw new BadRequestException('commentId should be a valid MongoDB id.');
@@ -79,6 +105,7 @@ export class CommentService {
       where: {
         id,
       },
+      include,
     });
 
     // check if the user is a member of the room where the comment is associated
@@ -96,6 +123,7 @@ export class CommentService {
     id: string,
     updateCommentInput: UpdateCommentInput,
     userId: string,
+    include: ICommentInclude,
   ): Promise<Comment> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
@@ -120,6 +148,7 @@ export class CommentService {
         id,
       },
       data: updateCommentInput,
+      include,
     });
     return comment;
   }
@@ -139,11 +168,32 @@ export class CommentService {
     if (!comment || comment.userId !== userId) {
       throw new NotFoundException(`Comment with id: ${id} not found`);
     }
-    await this.prisma.comment.delete({
+
+    const feed = await this.prisma.feed.findUnique({
       where: {
-        id,
+        id: comment.feedId,
+      },
+      select: {
+        id: true,
+        commentCount: true,
       },
     });
+
+    await this.prisma.$transaction([
+      this.prisma.comment.delete({
+        where: {
+          id,
+        },
+      }),
+      this.prisma.feed.update({
+        where: {
+          id: feed.id,
+        },
+        data: {
+          commentCount: feed.commentCount - 1,
+        },
+      }),
+    ]);
 
     return `Comment with id: ${id} deleted successfully`;
   }

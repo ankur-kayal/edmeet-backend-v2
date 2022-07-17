@@ -1,5 +1,7 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Room } from './../../room/entities/room.entity';
+import { Feed } from './../../feed/entities/feed.entity';
+import { Comment } from '../../comment/entities/comment.entity';
 
 @ObjectType()
 export class User {
@@ -28,6 +30,12 @@ export class User {
 
   @Field(() => [Room], { nullable: true })
   viewRooms?: Room[];
+
+  @Field(() => [Feed], { nullable: true })
+  feeds?: Feed[];
+
+  @Field(() => [Comment], { nullable: true })
+  comments?: Comment[];
 
   @Field()
   createdAt: Date;

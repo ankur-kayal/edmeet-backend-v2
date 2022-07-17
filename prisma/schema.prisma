@@ -15,7 +15,7 @@ model Room {
   name        String
   description String?
   code        String
-  photo       String   @default("default-photo.jpg")
+  photo       String   @default("/images/site/default.jpg")
   feeds       Feed[]
   editors     User[]   @relation(name: "editor room relation", fields: [editorIds], references: [id])
   editorIds   String[] @db.ObjectId

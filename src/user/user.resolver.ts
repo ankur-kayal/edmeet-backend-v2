@@ -25,6 +25,8 @@ export class UserResolver {
     const include = {
       editRooms: fields.indexOf('editRooms') !== -1,
       viewRooms: fields.indexOf('viewRooms') !== -1,
+      feeds: fields.indexOf('feeds') !== -1,
+      comments: fields.indexOf('comments') !== -1,
     };
     this.logger.log(context.req.user);
     return await this.userService.update(
