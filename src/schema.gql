@@ -4,6 +4,7 @@
 
 type Comment {
   createdAt: DateTime!
+  feed: Feed
   feedId: String!
   id: String!
   roomId: String!
@@ -41,11 +42,13 @@ scalar DateTime
 
 type Feed {
   commentCount: Int!
+  comments: [Comment!]
   createdAt: DateTime!
   id: String!
   roomId: String!
   text: String!
   updatedAt: DateTime!
+  user: User
   userId: String!
 }
 
@@ -131,10 +134,12 @@ input UpdateUserInput {
 }
 
 type User {
+  comments: [Comment!]
   createdAt: DateTime!
   editRoomIds: [String!]!
   editRooms: [Room!]
   email: String!
+  feeds: [Feed!]
   id: String!
   institution: String!
   name: String!

@@ -10,12 +10,18 @@ import { isValidObjectId } from '../lib';
 import { PrismaService } from './../prisma/prisma.service';
 import { Feed } from './entities/feed.entity';
 
+interface IFeedInclude {
+  comments: boolean;
+  user: boolean;
+}
+
 @Injectable()
 export class FeedService {
   constructor(private readonly prisma: PrismaService) {}
   async create(
     userId: string,
     createFeedInput: CreateFeedInput,
+    include: IFeedInclude,
   ): Promise<Feed> {
     // validate if room with roomId exists in the database
     if (
@@ -31,12 +37,17 @@ export class FeedService {
         ...createFeedInput,
         userId,
       },
+      include,
     });
 
     return feed;
   }
 
-  async findAll(roomId: string, userId: string): Promise<Feed[]> {
+  async findAll(
+    roomId: string,
+    userId: string,
+    include: IFeedInclude,
+  ): Promise<Feed[]> {
     // validate roomId
     if (!isValidObjectId(roomId)) {
       throw new BadRequestException('roomId should be a valid MongoDB id.');
@@ -50,10 +61,15 @@ export class FeedService {
       where: {
         roomId,
       },
+      include,
     });
   }
 
-  async findOne(id: string, userId: string): Promise<Feed> {
+  async findOne(
+    id: string,
+    userId: string,
+    include: IFeedInclude,
+  ): Promise<Feed> {
     // validate feedId
     if (!isValidObjectId(id)) {
       throw new BadRequestException('roomId should be a valid MongoDB id.');
@@ -63,6 +79,7 @@ export class FeedService {
       where: {
         id,
       },
+      include,
     });
 
     if (!feed) {
@@ -79,6 +96,7 @@ export class FeedService {
     id: string,
     updateFeedInput: UpdateFeedInput,
     userId: string,
+    include: IFeedInclude,
   ): Promise<Feed> {
     // validate if id is valid objectId
     if (!isValidObjectId(id)) {
@@ -103,6 +121,7 @@ export class FeedService {
         id,
       },
       data: updateFeedInput,
+      include,
     });
 
     return feed;
