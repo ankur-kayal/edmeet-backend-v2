@@ -1,5 +1,6 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { User } from './../../user/entities/user.entity';
+import { Feed } from './../../feed/entities/feed.entity';
 
 @ObjectType()
 export class Comment {
@@ -11,6 +12,9 @@ export class Comment {
 
   @Field()
   feedId: string;
+
+  @Field(() => Feed, { nullable: true })
+  feed?: Feed;
 
   @Field()
   roomId: string;
