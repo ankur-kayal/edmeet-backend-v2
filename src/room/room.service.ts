@@ -37,6 +37,7 @@ export class RoomService {
         editorIds: {
           set: [userId],
         },
+        viewerIds: [],
       },
       include,
     });
