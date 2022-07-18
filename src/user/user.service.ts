@@ -22,7 +22,11 @@ export class UserService {
     this.logger.debug('Creating user with input: ', createUserInput);
     createUserInput.password = await argon.hash(createUserInput.password);
     return await this.prisma.user.create({
-      data: createUserInput,
+      data: {
+        ...createUserInput,
+        editRoomIds: [],
+        viewRoomIds: [],
+      },
       include,
     });
   }
@@ -96,11 +100,23 @@ export class UserService {
     });
 
     if (canDelete) {
-      await this.prisma.user.delete({
-        where: {
-          id,
-        },
-      });
+      await this.prisma.$transaction([
+        this.prisma.feed.deleteMany({
+          where: {
+            userId: id,
+          },
+        }),
+        this.prisma.comment.deleteMany({
+          where: {
+            userId: id,
+          },
+        }),
+        this.prisma.user.delete({
+          where: {
+            id,
+          },
+        }),
+      ]);
 
       return `User with id: ${id} removed successfully!`;
     } else {
